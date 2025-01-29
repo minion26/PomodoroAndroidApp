@@ -3,9 +3,14 @@ package com.example.pomodoroapp;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -20,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView timerText, titleText;
     private ImageButton btnIncrease, btnDecrease;
-    private int minutes = 0; // Start time in minutes
+    private int minutes = 0; // Start time in minutes : 30
     private CountDownTimer countDownTimer;
     private long timeInMillis = minutes * 60 * 1000;
 
@@ -47,18 +52,54 @@ public class MainActivity extends AppCompatActivity {
 
         updateTimerText();
 
-        btnIncrease.setOnClickListener(v -> changeTime(1));
-        btnDecrease.setOnClickListener(v -> changeTime(-1));
+        btnIncrease.setOnClickListener(v -> changeTime(1)); // 5
+        btnDecrease.setOnClickListener(v -> changeTime(-1)); // -5
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(isRunning){
-                    reset();
+                    onButtonShowPopupWindowClick(v);
                 }else{
                     start();
                 }
             }
+        });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    public void onButtonShowPopupWindowClick(View view) {
+
+        //TODO : beautify the pop up message
+
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.pop_up, null);
+
+        Button cancelButton = popupView.findViewById(R.id.cancelButton);
+        Button giveUpButton = popupView.findViewById(R.id.giveUpButton);
+
+        // create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+        // show the popup window
+        // which view you pass in doesn't matter, it is only used for the window tolken
+        popupWindow.showAtLocation( view , Gravity.CENTER, 0, 0);
+
+        // Set click listeners for the buttons
+        cancelButton.setOnClickListener(v -> popupWindow.dismiss());
+        giveUpButton.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            reset();
+        });
+
+        // Dismiss the popup window when touched
+        popupView.setOnTouchListener((v, event) -> {
+            popupWindow.dismiss();
+            return true;
         });
     }
 
@@ -85,38 +126,43 @@ public class MainActivity extends AppCompatActivity {
 
     private void start(){
 
-        isRunning = true;
+        if(minutes != 0) {
+            //TODO : change the photo with the stages of a flower
 
-        //start the time
-        countDownTimer = new CountDownTimer(timeInMillis, 1000 ) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                timeInMillis = millisUntilFinished;
+            isRunning = true;
 
-                if(timeInMillis < 120000){
-                    titleText.setText(R.string.title_almost_done);
+            //start the time
+            countDownTimer = new CountDownTimer(timeInMillis, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    timeInMillis = millisUntilFinished;
+
+                    if (timeInMillis < 120000) {
+                        titleText.setText(R.string.title_almost_done);
+                    }
+                    updateTimerText();
                 }
-                updateTimerText();
-            }
 
-            @Override
-            public void onFinish() {
-                timerText.setText("00:00");
-            }
-        }.start();
+                @Override
+                public void onFinish() {
+                    timerText.setText("00:00");
+                }
+            }.start();
 
 
-        titleText.setText(R.string.title_countdown);
-        startButton.setText(R.string.quit);
+            titleText.setText(R.string.title_countdown);
+            startButton.setText(R.string.quit);
 
-        //stop the increase.decrease buttons
-        btnIncrease.setClickable(false);
-        btnDecrease.setClickable(false);
+            //stop the increase.decrease buttons
+            btnIncrease.setClickable(false);
+            btnDecrease.setClickable(false);
+
+        }
     }
 
     private void changeTime(int i) {
         minutes += i;
-        if (minutes < 0) minutes = 1;
+        if (minutes < 0) minutes = 1; // 30
         if(minutes > MAX_MINUTES) minutes = 120;
         timeInMillis = minutes * 60 * 1000;
         updateTimerText();
