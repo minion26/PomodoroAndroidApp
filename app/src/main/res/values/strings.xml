@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PomodoroApp</string>
+    <string name="title_start">Start learning!</string>
+    <string name="title_countdown">Don\'t quit!</string>
+    <string name="title_almost_done">Almost done!</string>
+    <string name="start">Plant</string>
+    <string name="quit">Quit</string>
+    <string name="decrease_time">Decrease time</string>
+    <string name="increase_time">Increase time</string>
+</resources>
