@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -252,7 +254,24 @@ public class MainActivity extends AppCompatActivity {
             btnDecrease.setClickable(false);
 
 
-            //TODO : pop up message if you want to exit the app and the flower is still growing
+            //pop up message if you want to exit the app and the flower is still growing
+            OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    // Show the exit confirmation dialog
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Exit")
+                            .setMessage("The timer is still running. Are you sure you want to exit?")
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                // Handle the exit action
+                                finish();
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
+                }
+            };
+
+            getOnBackPressedDispatcher().addCallback(this, callback);
 
         }
     }
