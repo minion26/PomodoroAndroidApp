@@ -1,6 +1,7 @@
 package com.example.pomodoroapp;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -248,6 +250,9 @@ public class MainActivity extends AppCompatActivity {
             //stop the increase.decrease buttons
             btnIncrease.setClickable(false);
             btnDecrease.setClickable(false);
+
+
+            //TODO : pop up message if you want to exit the app and the flower is still growing
 
         }
     }
