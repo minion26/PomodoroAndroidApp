@@ -1,6 +1,9 @@
 package com.example.pomodoroapp;
 
 import android.annotation.SuppressLint;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.Gravity;
@@ -144,6 +147,11 @@ public class MainActivity extends AppCompatActivity {
 
                     //every 25 minutes, make a pop up for the pause
                     if(elapsedMillis % ( 0.5 * 60 * 1000 ) < 1000){
+                        //make sound when is break time
+                        Uri notification = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pinterest_chime);
+                        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                        r.play();
+
                         //make the pop up for the pause appear
                         LayoutInflater inflaterPause = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
                         View popupViewPause = inflaterPause.inflate(R.layout.pause_pop_up, null);
