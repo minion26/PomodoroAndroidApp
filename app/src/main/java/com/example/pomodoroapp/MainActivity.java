@@ -6,21 +6,26 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.imageview.ShapeableImageView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
     private Button startButton;
 
     private Boolean isRunning = false;
+
+    private long timeToChangeImage ; // time to change the picture is 20%
+
+    private ShapeableImageView image ;
 
     private long timeInMillisForPause = (long) (0.5 * 60 * 1000); // 5 minutes pause time, now is 30 seconds
 
@@ -56,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         btnIncrease = findViewById(R.id.btnIncrease);
         btnDecrease = findViewById(R.id.btnDecrease);
         startButton = findViewById(R.id.startButton);
+        image = findViewById(R.id.image);
 
         updateTimerText(timerText, timeInMillis);
 
@@ -76,8 +86,6 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     public void onButtonShowPopupWindowClick(View view) {
-
-        //TODO : beautify the pop up message
 
         // inflate the layout of the popup window
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -127,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
         minutes = 0;
         timeInMillis = minutes * 60 * 1000;
+        timeToChangeImage = timeInMillis;
         updateTimerText(timerText, timeInMillis);
 
     }
@@ -134,16 +143,29 @@ public class MainActivity extends AppCompatActivity {
     private void start(){
 
         if(minutes != 0) {
-            //TODO : change the photo with the stages of a flower
 
             isRunning = true;
 
             //start the time
             countDownTimer = new CountDownTimer(timeInMillis, 1000) {
+                @SuppressLint("ClickableViewAccessibility")
                 @Override
                 public void onTick(long millisUntilFinished) {
                     timeInMillis = millisUntilFinished;
                     long elapsedMillis = ((long) minutes * 60 * 1000) - millisUntilFinished;
+
+                    // change the image when the time is almost up to simulate a growing flower
+                    if (millisUntilFinished <= (0.75 * timeToChangeImage )){
+                        image.setImageResource(R.drawable.torchflower0);
+                    }
+
+                    if(millisUntilFinished <= (0.5 * timeToChangeImage )){
+                        image.setImageResource(R.drawable.torchflowe1);
+                    }
+
+                    if(millisUntilFinished <= (0.25 * timeToChangeImage )){
+                        image.setImageResource(R.drawable.torchflower2);
+                    }
 
                     //every 25 minutes, make a pop up for the pause
                     if(elapsedMillis % ( 0.5 * 60 * 1000 ) < 1000){
@@ -169,13 +191,6 @@ public class MainActivity extends AppCompatActivity {
                         // which view you pass in doesn't matter, it is only used for the window tolken
                         popupWindow.showAtLocation( startButton , Gravity.CENTER, 0, 0);
 
-                        cancelPauseButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                popupWindow.dismiss();
-                            }
-                        });
-
                         countPauseDownTimer = new CountDownTimer(timeInMillisForPause, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
@@ -187,10 +202,28 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onFinish() {
                                 timerPauseText.setText("00:00");
+//                                timeInMillisForPause = (long) (0.5 * 60 * 1000);
+//                                updateTimerText(timerPauseText, timeInMillisForPause);
                                 popupWindow.dismiss();
                             }
                         }.start();
 
+                        cancelPauseButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                timeInMillisForPause = (long) (0.5 * 60 * 1000);
+                                updateTimerText(timerPauseText, timeInMillisForPause);
+                                countPauseDownTimer.cancel();
+                                popupWindow.dismiss();
+                            }
+                        });
+
+                        // Reset the onTouch listener each time the popup appears
+                        popupViewPause.setOnTouchListener((v, event) -> {
+//                            timeInMillisForPause = (long) (0.5 * 60 * 1000);
+                            popupWindow.dismiss();
+                            return true;
+                        });
 
                     }
 
@@ -224,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
         if (minutes < 0) minutes = 1; // 30
         if(minutes > MAX_MINUTES) minutes = 120;
         timeInMillis = minutes * 60 * 1000;
+        timeToChangeImage = timeInMillis;
         updateTimerText(timerText, timeInMillis);
     }
 
