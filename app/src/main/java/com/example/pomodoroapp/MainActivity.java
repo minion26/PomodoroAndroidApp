@@ -2,6 +2,9 @@ package com.example.pomodoroapp;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -10,6 +13,9 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -24,11 +30,15 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.imageview.ShapeableImageView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
 
     private long timeInMillisForPause = (long) (0.5 * 60 * 1000); // 5 minutes pause time, now is 30 seconds
 
+    private Toolbar toolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +81,13 @@ public class MainActivity extends AppCompatActivity {
         btnDecrease = findViewById(R.id.btnDecrease);
         startButton = findViewById(R.id.startButton);
         image = findViewById(R.id.image);
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        //hide the title in the toolbar
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
 
         updateTimerText(timerText, timeInMillis);
 
@@ -87,6 +106,46 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    private List<String> getAllInstalledApps(){
+        List<String> appNames = new ArrayList<>();
+        PackageManager pm = getPackageManager();
+        List<ApplicationInfo> infos = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        PackageManager packageManager = getPackageManager();
+        List<PackageInfo> packages = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
+
+        for (PackageInfo packageInfo : packages) {
+            ApplicationInfo appInfo = packageInfo.applicationInfo;
+            // this fives all the apps..
+            if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                String appName = packageManager.getApplicationLabel(appInfo).toString();
+                appNames.add(appName);
+            }
+        }
+
+        return appNames;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.settings_menu) {
+            // TODO: logic to block apps chosen by the user when the timer is running
+            return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 
     @SuppressLint("ClickableViewAccessibility")
     public void onButtonShowPopupWindowClick(View view) {
