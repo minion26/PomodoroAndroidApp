@@ -42,7 +42,11 @@ This application helps users follow this technique by providing a customizable t
 | Work    | 25  -  120              |
 | Break   | 5                  |
 
-### 4. Conclusion
+
+### 4. Next to do 
+- Implement a feature to block other apps that the user can access while the timer is running to prevent distractions.
+
+### 5. Conclusion
 The Pomodoro App helps users manage their time effectively by implementing the Pomodoro Technique. 
 The application provides a customizable timer, notifications, and visual cues to enhance productivity. 
 The use of `CountDownTimer` ensures accurate timing, while popup windows and sound notifications keep the user informed and engaged.
