@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     //every 25 minutes, make a pop up for the pause
-                    if(elapsedMillis % ( 25 * 60 * 1000 ) < 1000){
+                    if(elapsedMillis >= (25 * 60 * 1000) && elapsedMillis % ( 25 * 60 * 1000 ) < 1000){
                         //make sound when is break time
                         Uri notification = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pinterest_chime);
                         Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
