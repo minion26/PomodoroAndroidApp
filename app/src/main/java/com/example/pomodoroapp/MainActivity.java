@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView timerText, titleText;
     private ImageButton btnIncrease, btnDecrease;
-    private int minutes = 0; // Start time in minutes : 30
+    private int minutes = 30; // Start time in minutes : 30
     private CountDownTimer countDownTimer;
 
     private CountDownTimer countPauseDownTimer;
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ShapeableImageView image ;
 
-    private long timeInMillisForPause = (long) (0.5 * 60 * 1000); // 5 minutes pause time, now is 30 seconds
+    private long timeInMillisForPause = (long) (5 * 60 * 1000); // 5 minutes pause time
 
     private Toolbar toolbar;
 
@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // get the views from the layout
         titleText = findViewById(R.id.title);
         timerText = findViewById(R.id.timerText);
         btnIncrease = findViewById(R.id.btnIncrease);
@@ -82,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
         startButton = findViewById(R.id.startButton);
         image = findViewById(R.id.image);
         toolbar = findViewById(R.id.toolbar);
+
+        //set the toolbar as the action bar
         setSupportActionBar(toolbar);
 
         //hide the title in the toolbar
@@ -89,11 +92,14 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
+        // set the initial time
         updateTimerText(timerText, timeInMillis);
 
-        btnIncrease.setOnClickListener(v -> changeTime(1)); // 5
-        btnDecrease.setOnClickListener(v -> changeTime(-1)); // -5
+        // set the listeners for the buttons
+        btnIncrease.setOnClickListener(v -> changeTime(5)); // 5
+        btnDecrease.setOnClickListener(v -> changeTime(-5)); // -5
 
+        // listener for the start button
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // This method is called when the user clicks to add apps to the block list
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -114,17 +121,19 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    // this method gets all the installed apps on the phone
     private List<String> getAllInstalledApps(){
         List<String> appNames = new ArrayList<>();
         PackageManager pm = getPackageManager();
         List<ApplicationInfo> infos = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
+        // Get the app names
         PackageManager packageManager = getPackageManager();
         List<PackageInfo> packages = packageManager.getInstalledPackages(PackageManager.GET_META_DATA);
 
         for (PackageInfo packageInfo : packages) {
             ApplicationInfo appInfo = packageInfo.applicationInfo;
-            // this fives all the apps..
+            // Exclude system apps
             if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 String appName = packageManager.getApplicationLabel(appInfo).toString();
                 appNames.add(appName);
@@ -134,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
         return appNames;
     }
 
+    // This method is called when the user clicks on the settings icon
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -146,7 +156,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    // This method is called when the user wants to quit the app
+    // It shows a dialog to confirm the exit
     @SuppressLint("ClickableViewAccessibility")
     public void onButtonShowPopupWindowClick(View view) {
 
@@ -181,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
+    // method to reset the timer, texts and buttons to their initial state
     private void reset(){
 
         if (countDownTimer != null) {
@@ -203,8 +214,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // method to start the timer
     private void start(){
 
+        // check if the user has set a time
         if(minutes != 0) {
 
             isRunning = true;
@@ -231,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     //every 25 minutes, make a pop up for the pause
-                    if(elapsedMillis % ( 0.5 * 60 * 1000 ) < 1000){
+                    if(elapsedMillis % ( 25 * 60 * 1000 ) < 1000){
                         //make sound when is break time
                         Uri notification = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.pinterest_chime);
                         Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -254,6 +267,8 @@ public class MainActivity extends AppCompatActivity {
                         // which view you pass in doesn't matter, it is only used for the window tolken
                         popupWindow.showAtLocation( startButton , Gravity.CENTER, 0, 0);
 
+
+                        // timer for the pause time
                         countPauseDownTimer = new CountDownTimer(timeInMillisForPause, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
@@ -262,19 +277,23 @@ public class MainActivity extends AppCompatActivity {
                                 updateTimerText(timerPauseText, timeInMillisForPause);
                             }
 
+                            // show the time when the pause is over
                             @Override
                             public void onFinish() {
                                 timerPauseText.setText("00:00");
-//                                timeInMillisForPause = (long) (0.5 * 60 * 1000);
-//                                updateTimerText(timerPauseText, timeInMillisForPause);
+                                // timeInMillisForPause = (long) (0.5 * 60 * 1000);
+                                // updateTimerText(timerPauseText, timeInMillisForPause);
                                 popupWindow.dismiss();
                             }
                         }.start();
 
+                        // Set click listener for the cancel button
+                        // if the user wants to cancel the pause
                         cancelPauseButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 timeInMillisForPause = (long) (0.5 * 60 * 1000);
+                                // reset time pause for the next break time if exists
                                 updateTimerText(timerPauseText, timeInMillisForPause);
                                 countPauseDownTimer.cancel();
                                 popupWindow.dismiss();
@@ -283,20 +302,23 @@ public class MainActivity extends AppCompatActivity {
 
                         // Reset the onTouch listener each time the popup appears
                         popupViewPause.setOnTouchListener((v, event) -> {
-//                            timeInMillisForPause = (long) (0.5 * 60 * 1000);
+                            // timeInMillisForPause = (long) (5 * 60 * 1000);
                             popupWindow.dismiss();
                             return true;
                         });
 
                     }
 
-
+                    // change the title when the time is almost up
                     if (timeInMillis < 120000) {
                         titleText.setText(R.string.title_almost_done);
                     }
+
+                    // update the timer text view with the remaining time every second
                     updateTimerText(timerText, timeInMillis);
                 }
 
+                // when the timer is finished
                 @Override
                 public void onFinish() {
                     timerText.setText("00:00");
@@ -304,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }.start();
 
-
+            // change the title and the start button text
             titleText.setText(R.string.title_countdown);
             startButton.setText(R.string.quit);
 
@@ -330,20 +352,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
+            // Add the callback to the back button
             getOnBackPressedDispatcher().addCallback(this, callback);
 
         }
     }
 
+    // method to change the time
     private void changeTime(int i) {
         minutes += i;
-        if (minutes < 0) minutes = 1; // 30
+        if (minutes < 0) minutes = 30; // 30
         if(minutes > MAX_MINUTES) minutes = 120;
         timeInMillis = minutes * 60 * 1000;
         timeToChangeImage = timeInMillis;
+
+        // update the timer text view with the new time
         updateTimerText(timerText, timeInMillis);
     }
 
+    // method to update the timer text view with the remaining time
+    // to be displayed in a format easy to read
     @SuppressLint("DefaultLocale")
     private void updateTimerText(TextView view, long timeInMillis) {
         int mins = (int) (timeInMillis / 1000 / 60);
